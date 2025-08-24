@@ -708,60 +708,437 @@ export default function Home() {
 
         {/* 编辑节点对话框 */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-[700px] max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] lg:max-h-[calc(100vh-6rem)] overflow-y-auto dialog-scrollbar">
             <DialogHeader>
               <DialogTitle>编辑节点</DialogTitle>
               <DialogDescription>
-                修改节点的基本信息
+                修改节点的详细配置参数
               </DialogDescription>
             </DialogHeader>
             
             {editingProxy && (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-name">节点名称</Label>
-                  <Input
-                    id="edit-name"
-                    value={editingProxy.name}
-                    onChange={(e) => setEditingProxy({
-                      ...editingProxy,
-                      name: e.target.value
-                    })}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
+                {/* 基本信息 */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">基本信息</h4>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="edit-server">服务器</Label>
+                    <Label htmlFor="edit-name">节点名称</Label>
                     <Input
-                      id="edit-server"
-                      value={editingProxy.server}
+                      id="edit-name"
+                      value={editingProxy.name}
                       onChange={(e) => setEditingProxy({
                         ...editingProxy,
-                        server: e.target.value
+                        name: e.target.value
                       })}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-port">端口</Label>
-                    <Input
-                      id="edit-port"
-                      type="number"
-                      value={editingProxy.port}
-                      onChange={(e) => setEditingProxy({
-                        ...editingProxy,
-                        port: parseInt(e.target.value) || 443
-                      })}
-                    />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-server">服务器</Label>
+                      <Input
+                        id="edit-server"
+                        value={editingProxy.server}
+                        onChange={(e) => setEditingProxy({
+                          ...editingProxy,
+                          server: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-port">端口</Label>
+                      <Input
+                        id="edit-port"
+                        type="number"
+                        value={editingProxy.port}
+                        onChange={(e) => setEditingProxy({
+                          ...editingProxy,
+                          port: parseInt(e.target.value) || 443
+                        })}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 bg-muted rounded-lg">
+                    <div className="text-sm font-medium mb-1">协议类型</div>
+                    <Badge className={getProtocolColor(editingProxy.type)}>
+                      {getProtocolIcon(editingProxy.type)}
+                      <span className="ml-1">{editingProxy.type.toUpperCase()}</span>
+                    </Badge>
                   </div>
                 </div>
-                
-                <div className="p-3 bg-muted rounded-lg">
-                  <div className="text-sm font-medium mb-1">协议类型</div>
-                  <Badge className={getProtocolColor(editingProxy.type)}>
-                    {getProtocolIcon(editingProxy.type)}
-                    <span className="ml-1">{editingProxy.type.toUpperCase()}</span>
-                  </Badge>
+
+                {/* 协议特定参数 */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">协议参数</h4>
+                  
+                  {/* Shadowsocks 特定参数 */}
+                  {editingProxy.type === 'ss' && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-cipher">加密方法</Label>
+                          <Input
+                            id="edit-cipher"
+                            value={editingProxy.cipher || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              cipher: e.target.value
+                            })}
+                            placeholder="aes-256-gcm"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-password">密码</Label>
+                          <Input
+                            id="edit-password"
+                            type="text"
+                            value={editingProxy.password || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              password: e.target.value
+                            })}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-plugin">插件 (可选)</Label>
+                        <Input
+                          id="edit-plugin"
+                          value={editingProxy.plugin || ''}
+                          onChange={(e) => setEditingProxy({
+                            ...editingProxy,
+                            plugin: e.target.value || undefined
+                          })}
+                          placeholder="obfs-local"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VLESS 特定参数 */}
+                  {editingProxy.type === 'vless' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-uuid">UUID</Label>
+                        <Input
+                          id="edit-uuid"
+                          value={editingProxy.uuid || ''}
+                          onChange={(e) => setEditingProxy({
+                            ...editingProxy,
+                            uuid: e.target.value
+                          })}
+                          placeholder="12345678-1234-1234-1234-123456789012"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-network">传输协议</Label>
+                          <Input
+                            id="edit-network"
+                            value={editingProxy.network || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              network: e.target.value || undefined
+                            })}
+                            placeholder="ws, grpc, tcp"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-security">加密类型</Label>
+                          <Input
+                            id="edit-security"
+                            value={editingProxy.security || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              security: e.target.value || undefined
+                            })}
+                            placeholder="tls, reality"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-sni">SNI</Label>
+                          <Input
+                            id="edit-sni"
+                            value={editingProxy.sni || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              sni: e.target.value || undefined
+                            })}
+                            placeholder="example.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-flow">流控</Label>
+                          <Input
+                            id="edit-flow"
+                            value={editingProxy.flow || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              flow: e.target.value || undefined
+                            })}
+                            placeholder="xtls-rprx-vision"
+                          />
+                        </div>
+                      </div>
+                      
+                      {editingProxy.network === 'ws' && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-ws-path">WebSocket 路径</Label>
+                            <Input
+                              id="edit-ws-path"
+                              value={editingProxy['ws-opts']?.path || ''}
+                              onChange={(e) => setEditingProxy({
+                                ...editingProxy,
+                                'ws-opts': {
+                                  ...editingProxy['ws-opts'],
+                                  path: e.target.value || undefined
+                                }
+                              })}
+                              placeholder="/ws"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-ws-host">WebSocket Host</Label>
+                            <Input
+                              id="edit-ws-host"
+                              value={editingProxy['ws-opts']?.headers?.host || ''}
+                              onChange={(e) => setEditingProxy({
+                                ...editingProxy,
+                                'ws-opts': {
+                                  ...editingProxy['ws-opts'],
+                                  headers: {
+                                    ...editingProxy['ws-opts']?.headers,
+                                    host: e.target.value || undefined
+                                  }
+                                }
+                              })}
+                              placeholder="example.com"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Hysteria2 特定参数 */}
+                  {editingProxy.type === 'hysteria2' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-hy2-password">密码</Label>
+                        <Input
+                          id="edit-hy2-password"
+                          type="text"
+                          value={editingProxy.password || ''}
+                          onChange={(e) => setEditingProxy({
+                            ...editingProxy,
+                            password: e.target.value
+                          })}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-obfs">混淆类型</Label>
+                          <Input
+                            id="edit-obfs"
+                            value={editingProxy.obfs || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              obfs: e.target.value || undefined
+                            })}
+                            placeholder="salamander"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-obfs-password">混淆密码</Label>
+                          <Input
+                            id="edit-obfs-password"
+                            type="text"
+                            value={editingProxy['obfs-password'] || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              'obfs-password': e.target.value || undefined
+                            })}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-hy2-sni">SNI</Label>
+                          <Input
+                            id="edit-hy2-sni"
+                            value={editingProxy.sni || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              sni: e.target.value || undefined
+                            })}
+                            placeholder="example.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-skip-cert">跳过证书验证</Label>
+                          <select
+                            id="edit-skip-cert"
+                            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                            value={editingProxy['skip-cert-verify'] ? 'true' : 'false'}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              'skip-cert-verify': e.target.value === 'true' || undefined
+                            })}
+                          >
+                            <option value="false">否</option>
+                            <option value="true">是</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trojan 特定参数 */}
+                  {editingProxy.type === 'trojan' && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-trojan-password">密码</Label>
+                        <Input
+                          id="edit-trojan-password"
+                          type="text"
+                          value={editingProxy.password || ''}
+                          onChange={(e) => setEditingProxy({
+                            ...editingProxy,
+                            password: e.target.value
+                          })}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-trojan-sni">SNI</Label>
+                          <Input
+                            id="edit-trojan-sni"
+                            value={editingProxy.sni || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              sni: e.target.value || undefined
+                            })}
+                            placeholder="example.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="edit-trojan-network">传输协议</Label>
+                          <Input
+                            id="edit-trojan-network"
+                            value={editingProxy.network || ''}
+                            onChange={(e) => setEditingProxy({
+                              ...editingProxy,
+                              network: e.target.value || undefined
+                            })}
+                            placeholder="ws, grpc, tcp"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-trojan-skip-cert">跳过证书验证</Label>
+                        <select
+                          id="edit-trojan-skip-cert"
+                          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                          value={editingProxy['skip-cert-verify'] ? 'true' : 'false'}
+                          onChange={(e) => setEditingProxy({
+                            ...editingProxy,
+                            'skip-cert-verify': e.target.value === 'true' || undefined
+                          })}
+                        >
+                          <option value="false">否</option>
+                          <option value="true">是</option>
+                        </select>
+                      </div>
+                      
+                      {editingProxy.network === 'ws' && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-trojan-ws-path">WebSocket 路径</Label>
+                            <Input
+                              id="edit-trojan-ws-path"
+                              value={editingProxy['ws-opts']?.path || ''}
+                              onChange={(e) => setEditingProxy({
+                                ...editingProxy,
+                                'ws-opts': {
+                                  ...editingProxy['ws-opts'],
+                                  path: e.target.value || undefined
+                                }
+                              })}
+                              placeholder="/ws"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="edit-trojan-ws-host">WebSocket Host</Label>
+                            <Input
+                              id="edit-trojan-ws-host"
+                              value={editingProxy['ws-opts']?.headers?.host || ''}
+                              onChange={(e) => setEditingProxy({
+                                ...editingProxy,
+                                'ws-opts': {
+                                  ...editingProxy['ws-opts'],
+                                  headers: {
+                                    ...editingProxy['ws-opts']?.headers,
+                                    host: e.target.value || undefined
+                                  }
+                                }
+                              })}
+                              placeholder="example.com"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 高级参数 */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">高级参数</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-udp">UDP 支持</Label>
+                      <select
+                        id="edit-udp"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        value={editingProxy.udp ? 'true' : 'false'}
+                        onChange={(e) => setEditingProxy({
+                          ...editingProxy,
+                          udp: e.target.value === 'true'
+                        })}
+                      >
+                        <option value="false">禁用</option>
+                        <option value="true">启用</option>
+                      </select>
+                    </div>
+                    
+                    {(editingProxy.type === 'vless' || editingProxy.type === 'hysteria2' || editingProxy.type === 'trojan') && editingProxy.alpn && (
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-alpn">ALPN 协议</Label>
+                        <Input
+                          id="edit-alpn"
+                          value={Array.isArray(editingProxy.alpn) ? editingProxy.alpn.join(',') : editingProxy.alpn}
+                          onChange={(e) => setEditingProxy({
+                            ...editingProxy,
+                            alpn: e.target.value ? e.target.value.split(',').map(s => s.trim()) : undefined
+                          })}
+                          placeholder="h2,http/1.1"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

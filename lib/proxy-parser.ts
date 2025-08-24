@@ -1,0 +1,369 @@
+// 订阅链接解析器
+export interface ProxyNode {
+  name: string;
+  type: string;
+  server: string;
+  port: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+export interface VlessConfig {
+  uuid: string;
+  network?: string;
+  tls?: boolean;
+  sni?: string;
+  alpn?: string[];
+  path?: string;
+  host?: string;
+  headers?: Record<string, string>;
+  security?: string;
+  flow?: string;
+  'client-fingerprint'?: string;
+}
+
+export interface Hysteria2Config {
+  password: string;
+  obfs?: string;
+  'obfs-password'?: string;
+  sni?: string;
+  'skip-cert-verify'?: boolean;
+  alpn?: string[];
+  'up-mbps'?: number;
+  'down-mbps'?: number;
+}
+
+export interface ShadowsocksConfig {
+  cipher: string;
+  password: string;
+  plugin?: string;
+  'plugin-opts'?: Record<string, string | number | boolean>;
+}
+
+export interface TrojanConfig {
+  password: string;
+  sni?: string;
+  'skip-cert-verify'?: boolean;
+  alpn?: string[];
+  network?: string;
+  'ws-opts'?: {
+    path?: string;
+    headers?: Record<string, string>;
+  };
+}
+
+export class ProxyParser {
+  
+  /**
+   * 解析 Base64 编码的 URL
+   */
+  private static decodeBase64(str: string): string {
+    try {
+      return atob(str);
+    } catch {
+      // 如果不是有效的 Base64，直接返回原字符串
+      return str;
+    }
+  }
+
+  /**
+   * 解析 URL 参数
+   */
+  private static parseUrlParams(search: string): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (!search) return params;
+    
+    const urlParams = new URLSearchParams(search);
+    for (const [key, value] of urlParams.entries()) {
+      params[key] = value;
+    }
+    return params;
+  }
+
+  /**
+   * 解析 VLESS 链接
+   * vless://uuid@server:port?param1=value1&param2=value2#name
+   */
+  static parseVless(url: string): ProxyNode | null {
+    try {
+      if (!url.startsWith('vless://')) {
+        throw new Error('不是有效的 VLESS 链接');
+      }
+
+      const urlObj = new URL(url);
+      const uuid = urlObj.username;
+      const server = urlObj.hostname;
+      const port = parseInt(urlObj.port) || 443;
+      const name = decodeURIComponent(urlObj.hash.slice(1)) || `vless-${server}`;
+      const params = this.parseUrlParams(urlObj.search);
+
+      const config: ProxyNode & VlessConfig = {
+        name,
+        type: 'vless',
+        server,
+        port,
+        uuid,
+        udp: true,
+      };
+
+      // 处理传输层协议
+      if (params.type) {
+        config.network = params.type;
+      }
+
+      // 处理 TLS
+      if (params.security === 'tls' || params.security === 'reality') {
+        config.tls = true;
+        config.security = params.security;
+        
+        if (params.sni) {
+          config.sni = params.sni;
+        }
+        
+        if (params.alpn) {
+          config.alpn = params.alpn.split(',');
+        }
+
+        if (params.fp) {
+          config['client-fingerprint'] = params.fp;
+        }
+      }
+
+      // 处理 WebSocket 配置
+      if (params.type === 'ws') {
+        config['ws-opts'] = {};
+        if (params.path) {
+          config['ws-opts'].path = params.path;
+        }
+        if (params.host) {
+          config['ws-opts'].headers = { host: params.host };
+        }
+      }
+
+      // 处理 gRPC 配置
+      if (params.type === 'grpc') {
+        config['grpc-opts'] = {};
+        if (params.serviceName) {
+          config['grpc-opts']['grpc-service-name'] = params.serviceName;
+        }
+      }
+
+      // 处理流控
+      if (params.flow) {
+        config.flow = params.flow;
+      }
+
+      return config;
+    } catch (error) {
+      console.error('解析 VLESS 链接失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 解析 Hysteria2 链接
+   * hysteria2://password@server:port?param1=value1&param2=value2#name
+   */
+  static parseHysteria2(url: string): ProxyNode | null {
+    try {
+      if (!url.startsWith('hysteria2://') && !url.startsWith('hy2://')) {
+        throw new Error('不是有效的 Hysteria2 链接');
+      }
+
+      const urlObj = new URL(url);
+      const password = urlObj.username;
+      const server = urlObj.hostname;
+      const port = parseInt(urlObj.port) || 443;
+      const name = decodeURIComponent(urlObj.hash.slice(1)) || `hysteria2-${server}`;
+      const params = this.parseUrlParams(urlObj.search);
+
+      const config: ProxyNode & Hysteria2Config = {
+        name,
+        type: 'hysteria2',
+        server,
+        port,
+        password,
+      };
+
+      // 处理混淆
+      if (params.obfs) {
+        config.obfs = params.obfs;
+        if (params['obfs-password']) {
+          config['obfs-password'] = params['obfs-password'];
+        }
+      }
+
+      // 处理 SNI
+      if (params.sni) {
+        config.sni = params.sni;
+      }
+
+      // 处理证书验证
+      if (params['skip-cert-verify'] === 'true') {
+        config['skip-cert-verify'] = true;
+      }
+
+      // 处理 ALPN
+      if (params.alpn) {
+        config.alpn = params.alpn.split(',');
+      }
+
+      // 处理带宽限制
+      if (params.up) {
+        config['up-mbps'] = parseInt(params.up);
+      }
+      if (params.down) {
+        config['down-mbps'] = parseInt(params.down);
+      }
+
+      return config;
+    } catch (error) {
+      console.error('解析 Hysteria2 链接失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 解析 Shadowsocks 链接
+   * ss://method:password@server:port#name
+   * ss://base64(method:password)@server:port#name
+   */
+  static parseShadowsocks(url: string): ProxyNode | null {
+    try {
+      if (!url.startsWith('ss://')) {
+        throw new Error('不是有效的 Shadowsocks 链接');
+      }
+
+      const urlObj = new URL(url);
+      let method: string;
+      let password: string;
+      
+      // 处理两种编码格式
+      if (urlObj.username && urlObj.password) {
+        // 格式：ss://method:password@server:port#name
+        method = urlObj.username;
+        password = urlObj.password;
+      } else {
+        // 格式：ss://base64(method:password)@server:port#name
+        const encoded = url.slice(5).split('@')[0];
+        const decoded = this.decodeBase64(encoded);
+        const [decodedMethod, decodedPassword] = decoded.split(':');
+        method = decodedMethod;
+        password = decodedPassword;
+      }
+
+      const server = urlObj.hostname;
+      const port = parseInt(urlObj.port) || 8388;
+      const name = decodeURIComponent(urlObj.hash.slice(1)) || `ss-${server}`;
+
+      return {
+        name,
+        type: 'ss',
+        server,
+        port,
+        cipher: method,
+        password,
+        udp: true,
+      };
+    } catch (error) {
+      console.error('解析 Shadowsocks 链接失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 解析 Trojan 链接
+   * trojan://password@server:port?param1=value1&param2=value2#name
+   */
+  static parseTrojan(url: string): ProxyNode | null {
+    try {
+      if (!url.startsWith('trojan://')) {
+        throw new Error('不是有效的 Trojan 链接');
+      }
+
+      const urlObj = new URL(url);
+      const password = urlObj.username;
+      const server = urlObj.hostname;
+      const port = parseInt(urlObj.port) || 443;
+      const name = decodeURIComponent(urlObj.hash.slice(1)) || `trojan-${server}`;
+      const params = this.parseUrlParams(urlObj.search);
+
+      const config: ProxyNode & TrojanConfig = {
+        name,
+        type: 'trojan',
+        server,
+        port,
+        password,
+        udp: true,
+      };
+
+      // 处理 SNI
+      if (params.sni) {
+        config.sni = params.sni;
+      }
+
+      // 处理证书验证
+      if (params['skip-cert-verify'] === 'true') {
+        config['skip-cert-verify'] = true;
+      }
+
+      // 处理 ALPN
+      if (params.alpn) {
+        config.alpn = params.alpn.split(',');
+      }
+
+      // 处理 WebSocket
+      if (params.type === 'ws') {
+        config.network = 'ws';
+        config['ws-opts'] = {};
+        if (params.path) {
+          config['ws-opts'].path = params.path;
+        }
+        if (params.host) {
+          config['ws-opts'].headers = { host: params.host };
+        }
+      }
+
+      return config;
+    } catch (error) {
+      console.error('解析 Trojan 链接失败:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 自动检测并解析代理链接
+   */
+  static parseProxy(url: string): ProxyNode | null {
+    const trimmedUrl = url.trim();
+    
+    if (trimmedUrl.startsWith('vless://')) {
+      return this.parseVless(trimmedUrl);
+    } else if (trimmedUrl.startsWith('hysteria2://') || trimmedUrl.startsWith('hy2://')) {
+      return this.parseHysteria2(trimmedUrl);
+    } else if (trimmedUrl.startsWith('ss://')) {
+      return this.parseShadowsocks(trimmedUrl);
+    } else if (trimmedUrl.startsWith('trojan://')) {
+      return this.parseTrojan(trimmedUrl);
+    } else {
+      console.error('不支持的代理协议:', trimmedUrl.split('://')[0]);
+      return null;
+    }
+  }
+
+  /**
+   * 解析多个代理链接
+   */
+  static parseMultipleProxies(urls: string[]): ProxyNode[] {
+    const proxies: ProxyNode[] = [];
+    
+    for (const url of urls) {
+      const proxy = this.parseProxy(url);
+      if (proxy) {
+        proxies.push(proxy);
+      }
+    }
+    
+    return proxies;
+  }
+}

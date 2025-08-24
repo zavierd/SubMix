@@ -295,13 +295,13 @@ export class MihomoConfigGenerator {
   static generateProxyGroups(proxyNames: string[]) {
     return [
       {
-        name: '🚀 手动切换',
+        name: '手动切换',
         type: 'select' as const,
-        proxies: ['♻️ 自动选择', '🔯 故障转移', '🔮 负载均衡', '🎯 全球直连', ...proxyNames],
+        proxies: ['自动选择', '故障转移', '负载均衡', '全球直连', ...proxyNames],
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Rocket.png'
       },
       {
-        name: '♻️ 自动选择',
+        name: '自动选择',
         type: 'url-test' as const,
         proxies: proxyNames,
         url: 'http://www.gstatic.com/generate_204',
@@ -310,7 +310,7 @@ export class MihomoConfigGenerator {
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Auto.png'
       },
       {
-        name: '🔯 故障转移',
+        name: '故障转移',
         type: 'fallback' as const,
         proxies: proxyNames,
         url: 'http://www.gstatic.com/generate_204',
@@ -318,7 +318,7 @@ export class MihomoConfigGenerator {
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Available.png'
       },
       {
-        name: '🔮 负载均衡',
+        name: '负载均衡',
         type: 'load-balance' as const,
         proxies: proxyNames,
         url: 'http://www.gstatic.com/generate_204',
@@ -326,13 +326,13 @@ export class MihomoConfigGenerator {
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Static.png'
       },
       {
-        name: '🛑 广告拦截',
+        name: '广告拦截',
         type: 'select' as const,
-        proxies: ['REJECT', '🎯 全球直连'],
+        proxies: ['REJECT', '全球直连'],
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png'
       },
       {
-        name: '🎯 全球直连',
+        name: '全球直连',
         type: 'select' as const,
         proxies: ['DIRECT'],
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png'
@@ -346,42 +346,42 @@ export class MihomoConfigGenerator {
   static generateBasicRules(): string[] {
     return [
       // 常见软件直连
-      'RULE-SET,applications,🎯 全球直连',
+      'RULE-SET,applications,全球直连',
       
       // Clash 管理面板
-      'DOMAIN,clash.razord.top,🎯 全球直连',
-      'DOMAIN,yacd.haishan.me,🎯 全球直连',
+      'DOMAIN,clash.razord.top,全球直连',
+      'DOMAIN,yacd.haishan.me,全球直连',
       
       // 私有和局域网
-      'RULE-SET,private,🎯 全球直连',
+      'RULE-SET,private,全球直连',
       
       // 广告拦截
-      'RULE-SET,reject,🛑 广告拦截',
+      'RULE-SET,reject,广告拦截',
       
       // Apple 和 iCloud 服务
-      'RULE-SET,icloud,🎯 全球直连',
-      'RULE-SET,apple,🎯 全球直连',
+      'RULE-SET,icloud,全球直连',
+      'RULE-SET,apple,全球直连',
       
       // Google 服务 (根据需要可改为代理)
-      'RULE-SET,google,🚀 手动切换',
+      'RULE-SET,google,手动切换',
       
       // 代理域名列表
-      'RULE-SET,proxy,🚀 手动切换',
+      'RULE-SET,proxy,手动切换',
       
       // 直连域名列表
-      'RULE-SET,direct,🎯 全球直连',
+      'RULE-SET,direct,全球直连',
       
       // IP 段规则
-      'RULE-SET,lancidr,🎯 全球直连',
-      'RULE-SET,cncidr,🎯 全球直连',
-      'RULE-SET,telegramcidr,🚀 手动切换',
+      'RULE-SET,lancidr,全球直连',
+      'RULE-SET,cncidr,全球直连',
+      'RULE-SET,telegramcidr,手动切换',
       
       // GeoIP 规则
-      'GEOIP,LAN,🎯 全球直连',
-      'GEOIP,CN,🎯 全球直连',
+      'GEOIP,LAN,全球直连',
+      'GEOIP,CN,全球直连',
       
       // 最终规则 (白名单模式：未匹配的走代理)
-      'MATCH,🚀 手动切换'
+      'MATCH,手动切换'
     ];
   }
   
@@ -391,25 +391,25 @@ export class MihomoConfigGenerator {
   static generateBlacklistRules(): string[] {
     return [
       // 常见软件直连
-      'RULE-SET,applications,🎯 全球直连',
+      'RULE-SET,applications,全球直连',
       
       // Clash 管理面板
-      'DOMAIN,clash.razord.top,🎯 全球直连',
-      'DOMAIN,yacd.haishan.me,🎯 全球直连',
+      'DOMAIN,clash.razord.top,全球直连',
+      'DOMAIN,yacd.haishan.me,全球直连',
       
       // 私有和局域网
-      'RULE-SET,private,🎯 全球直连',
+      'RULE-SET,private,全球直连',
       
       // 广告拦截
-      'RULE-SET,reject,🛑 广告拦截',
+      'RULE-SET,reject,广告拦截',
       
       // 需要代理的域名
-      'RULE-SET,tld-not-cn,🚀 手动切换',
-      'RULE-SET,gfw,🚀 手动切换',
-      'RULE-SET,telegramcidr,🚀 手动切换',
+      'RULE-SET,tld-not-cn,手动切换',
+      'RULE-SET,gfw,手动切换',
+      'RULE-SET,telegramcidr,手动切换',
       
       // 最终规则 (黑名单模式：未匹配的走直连)
-      'MATCH,🎯 全球直连'
+      'MATCH,全球直连'
     ];
   }
 
@@ -580,13 +580,13 @@ export class MihomoConfigGenerator {
     // 简化的代理组
     const proxyGroups = [
       {
-        name: '🚀 手动切换',
+        name: '手动切换',
         type: 'select' as const,
-        proxies: ['♻️ 自动选择', '🎯 全球直连', ...proxyNames],
+        proxies: ['自动选择', '全球直连', ...proxyNames],
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Rocket.png'
       },
       {
-        name: '♻️ 自动选择',
+        name: '自动选择',
         type: 'url-test' as const,
         proxies: proxyNames,
         url: 'http://www.gstatic.com/generate_204',
@@ -594,13 +594,13 @@ export class MihomoConfigGenerator {
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Auto.png'
       },
       {
-        name: '🛑 广告拦截',
+        name: '广告拦截',
         type: 'select' as const,
-        proxies: ['REJECT', '🎯 全球直连'],
+        proxies: ['REJECT', '全球直连'],
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png'
       },
       {
-        name: '🎯 全球直连',
+        name: '全球直连',
         type: 'select' as const,
         proxies: ['DIRECT'],
         icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png'
@@ -674,22 +674,22 @@ export class MihomoConfigGenerator {
     // 根据模式选择规则
     const rules = ruleMode === 'whitelist' ? [
       // 白名单模式 - 未匹配的走代理
-      'RULE-SET,private,🎯 全球直连',
-      'RULE-SET,reject,🛑 广告拦截',
-      'RULE-SET,direct,🎯 全球直连',
-      'RULE-SET,proxy,🚀 手动切换',
-      'RULE-SET,lancidr,🎯 全球直连',
-      'RULE-SET,cncidr,🎯 全球直连',
-      'GEOIP,LAN,🎯 全球直连',
-      'GEOIP,CN,🎯 全球直连',
-      'MATCH,🚀 手动切换'
+      'RULE-SET,private,全球直连',
+      'RULE-SET,reject,广告拦截',
+      'RULE-SET,direct,全球直连',
+      'RULE-SET,proxy,手动切换',
+      'RULE-SET,lancidr,全球直连',
+      'RULE-SET,cncidr,全球直连',
+      'GEOIP,LAN,全球直连',
+      'GEOIP,CN,全球直连',
+      'MATCH,手动切换'
     ] : [
       // 黑名单模式 - 未匹配的走直连
-      'RULE-SET,private,🎯 全球直连',
-      'RULE-SET,reject,🛑 广告拦截',
-      'RULE-SET,gfw,🚀 手动切换',
-      'RULE-SET,tld-not-cn,🚀 手动切换',
-      'MATCH,🎯 全球直连'
+      'RULE-SET,private,全球直连',
+      'RULE-SET,reject,广告拦截',
+      'RULE-SET,gfw,手动切换',
+      'RULE-SET,tld-not-cn,手动切换',
+      'MATCH,全球直连'
     ];
 
     return {

@@ -38,6 +38,8 @@ export interface ShadowsocksConfig {
   password: string;
   plugin?: string;
   'plugin-opts'?: Record<string, string | number | boolean>;
+  // SS2022 专用字段
+  'server-port'?: number;
 }
 
 export interface TrojanConfig {
@@ -224,7 +226,42 @@ export class ProxyParser {
   }
 
   /**
-   * 解析 Shadowsocks 链接
+   * 检查是否为 SS2022 加密方法
+   */
+  private static isSS2022Method(method: string): boolean {
+    const ss2022Methods = [
+      '2022-blake3-aes-128-gcm',
+      '2022-blake3-aes-256-gcm', 
+      '2022-blake3-chacha20-poly1305'
+    ];
+    return ss2022Methods.includes(method.toLowerCase());
+  }
+
+  /**
+   * 获取支持的 Shadowsocks 加密方法
+   */
+  static getSupportedSSMethods(): string[] {
+    return [
+      // 传统 SS 方法
+      'aes-128-gcm',
+      'aes-256-gcm',
+      'aes-128-cfb',
+      'aes-256-cfb',
+      'aes-128-ctr',
+      'aes-256-ctr',
+      'chacha20-ietf',
+      'chacha20-ietf-poly1305',
+      'xchacha20-ietf-poly1305',
+      'rc4-md5',
+      // SS2022 新方法
+      '2022-blake3-aes-128-gcm',
+      '2022-blake3-aes-256-gcm',
+      '2022-blake3-chacha20-poly1305'
+    ];
+  }
+
+  /**
+   * 解析 Shadowsocks 链接 (支持 SS 和 SS2022)
    * ss://method:password@server:port#name
    * ss://base64(method:password)@server:port#name
    */
@@ -256,7 +293,13 @@ export class ProxyParser {
       const port = parseInt(urlObj.port) || 8388;
       const name = decodeURIComponent(urlObj.hash.slice(1)) || `ss-${server}`;
 
-      return {
+      // 验证加密方法
+      const supportedMethods = this.getSupportedSSMethods();
+      if (!supportedMethods.includes(method.toLowerCase())) {
+        console.warn(`不支持的 Shadowsocks 加密方法: ${method}`);
+      }
+
+      const config: ProxyNode & ShadowsocksConfig = {
         name,
         type: 'ss',
         server,
@@ -265,6 +308,19 @@ export class ProxyParser {
         password,
         udp: true,
       };
+
+      // 处理 SS2022 特殊配置
+      if (this.isSS2022Method(method)) {
+        // SS2022 协议的特殊处理
+        config['server-port'] = port;
+        
+        // SS2022 密码格式验证
+        if (!password || password.length < 16) {
+          console.warn('SS2022 密码长度可能不足，建议使用更长的密码');
+        }
+      }
+
+      return config;
     } catch (error) {
       console.error('解析 Shadowsocks 链接失败:', error);
       return null;
@@ -329,6 +385,32 @@ export class ProxyParser {
       console.error('解析 Trojan 链接失败:', error);
       return null;
     }
+  }
+
+  /**
+   * 验证 Shadowsocks 配置
+   */
+  static validateShadowsocksConfig(config: ProxyNode & ShadowsocksConfig): boolean {
+    // 检查基本字段
+    if (!config.cipher || !config.password || !config.server || !config.port) {
+      return false;
+    }
+
+    // 检查加密方法是否支持
+    const supportedMethods = this.getSupportedSSMethods();
+    if (!supportedMethods.includes(config.cipher.toLowerCase())) {
+      return false;
+    }
+
+    // SS2022 特殊验证
+    if (this.isSS2022Method(config.cipher)) {
+      // SS2022 需要更强的密码
+      if (config.password.length < 16) {
+        console.warn('SS2022 建议使用更长的密码');
+      }
+    }
+
+    return true;
   }
 
   /**

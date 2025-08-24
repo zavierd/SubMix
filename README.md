@@ -41,17 +41,26 @@ hy2://password@server:port?param1=value1&param2=value2#name
 - `down`: 下行带宽 (Mbps)
 - `skip-cert-verify`: 跳过证书验证
 
-### Shadowsocks
+### Shadowsocks (支持 SS 和 SS2022)
 ```
 ss://method:password@server:port#name
 ss://base64(method:password)@server:port#name
 ```
-支持的加密方法：
-- AES-256-GCM
-- AES-128-GCM
-- ChaCha20-Poly1305
-- AES-256-CFB
-- 等等
+
+**传统 SS 加密方法：**
+- aes-128-gcm / aes-256-gcm
+- aes-128-cfb / aes-256-cfb  
+- aes-128-ctr / aes-256-ctr
+- chacha20-ietf / chacha20-ietf-poly1305
+- xchacha20-ietf-poly1305
+- rc4-md5
+
+**SS2022 新型加密方法：**
+- 2022-blake3-aes-128-gcm
+- 2022-blake3-aes-256-gcm
+- 2022-blake3-chacha20-poly1305
+
+> SS2022 提供更强的安全性和性能，建议优先使用
 
 ### Trojan
 ```

@@ -57,12 +57,24 @@ export interface TrojanConfig {
 export class ProxyParser {
   
   /**
-   * 解析 Base64 编码的 URL
+   * 解析 Base64 编码的字符串
    */
   private static decodeBase64(str: string): string {
     try {
-      return atob(str);
-    } catch {
+      // 清理 Base64 字符串，移除可能的 URL 编码
+      let cleanStr = str.trim();
+      
+      // 处理 URL 安全的 Base64 (替换 - 和 _ 为标准 Base64 字符)
+      cleanStr = cleanStr.replace(/-/g, '+').replace(/_/g, '/');
+      
+      // 确保 Base64 字符串的长度是 4 的倍数
+      while (cleanStr.length % 4) {
+        cleanStr += '=';
+      }
+      
+      return atob(cleanStr);
+    } catch (error) {
+      console.warn('Base64 解码失败:', str, error);
       // 如果不是有效的 Base64，直接返回原字符串
       return str;
     }
@@ -278,15 +290,33 @@ export class ProxyParser {
       // 处理两种编码格式
       if (urlObj.username && urlObj.password) {
         // 格式：ss://method:password@server:port#name
-        method = urlObj.username;
-        password = urlObj.password;
+        method = decodeURIComponent(urlObj.username);
+        password = decodeURIComponent(urlObj.password);
       } else {
         // 格式：ss://base64(method:password)@server:port#name
-        const encoded = url.slice(5).split('@')[0];
-        const decoded = this.decodeBase64(encoded);
-        const [decodedMethod, decodedPassword] = decoded.split(':');
-        method = decodedMethod;
-        password = decodedPassword;
+        try {
+          // 提取 Base64 编码部分
+          const urlWithoutProtocol = url.slice(5); // 移除 "ss://"
+          const atIndex = urlWithoutProtocol.indexOf('@');
+          
+          if (atIndex === -1) {
+            throw new Error('无效的 Shadowsocks 链接格式');
+          }
+          
+          const encoded = urlWithoutProtocol.slice(0, atIndex);
+          const decoded = this.decodeBase64(encoded);
+          
+          const colonIndex = decoded.indexOf(':');
+          if (colonIndex === -1) {
+            throw new Error('Base64 解码后格式无效');
+          }
+          
+          method = decoded.slice(0, colonIndex);
+          password = decoded.slice(colonIndex + 1);
+        } catch (error) {
+          console.error('Base64 格式解析失败:', error);
+          throw new Error('无法解析 Base64 编码的 Shadowsocks 链接');
+        }
       }
 
       const server = urlObj.hostname;

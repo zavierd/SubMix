@@ -563,10 +563,19 @@ export class MihomoConfigGenerator {
    */
   static configToYaml(config: MihomoConfig): string {
     return yaml.dump(config, {
-      lineWidth: -1,
-      noRefs: true,
-      quotingType: '"',
-      forceQuotes: false
+      lineWidth: -1,           // 禁用行宽限制，防止长字符串被截断
+      noRefs: true,            // 禁用引用，避免重复对象引用
+      quotingType: '"',        // 使用双引号
+      forceQuotes: false,      // 只在必要时使用引号
+      flowLevel: -1,           // 禁用流式样式限制
+      noCompatMode: true,      // 禁用兼容模式
+      skipInvalid: false,      // 不跳过无效值
+      sortKeys: false,         // 保持原始键顺序
+      condenseFlow: false,     // 不压缩流式内容
+      indent: 2,               // 使用2空格缩进
+      noArrayIndent: false,    // 数组使用缩进
+      replacer: undefined,     // 不使用替换函数
+      schema: yaml.DEFAULT_SCHEMA  // 使用默认模式
     });
   }
 

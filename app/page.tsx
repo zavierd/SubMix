@@ -25,7 +25,8 @@ import {
   Server,
   Network,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Github
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -222,7 +223,20 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         
         {/* 页面标题 */}
-        <div className="text-center mb-8">
+        <div className="relative text-center mb-8">
+          {/* GitHub 链接按钮 */}
+          <div className="absolute top-0 right-0">
+            <Button
+              variant="outline"
+              size="default"
+              className="flex items-center gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
+              onClick={() => window.open('https://github.com/YoungLee-coder/SubMix', '_blank')}
+            >
+              <Github className="h-5 w-5" />
+              <span className="hidden sm:inline">GitHub</span>
+            </Button>
+          </div>
+          
           <div className="flex items-center justify-center gap-3 mb-4">
             <Rocket className="h-8 w-8 text-primary" />
             <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">

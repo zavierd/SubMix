@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { 
   Download, 
   Copy, 
@@ -26,7 +27,8 @@ import {
   Network,
   Shield,
   AlertCircle,
-  Github
+  Github,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +38,8 @@ interface ParsedProxy extends ProxyNode {
 
 export default function Home() {
   const [singleLink, setSingleLink] = useState("");
+  const [batchLinks, setBatchLinks] = useState("");
+  const [inputMode, setInputMode] = useState<"single" | "batch">("single");
   const [parsedProxies, setParsedProxies] = useState<ParsedProxy[]>([]);
 
   const [ruleMode, setRuleMode] = useState<"whitelist" | "blacklist">("whitelist");
@@ -105,6 +109,53 @@ export default function Home() {
     } catch (error) {
       console.error("解析错误:", error);
       toast.error("解析失败，请检查链接格式");
+    }
+  };
+
+  // 批量解析链接
+  const handleParseBatchLinks = () => {
+    if (!batchLinks.trim()) {
+      toast.error("请输入订阅链接");
+      return;
+    }
+
+    const links = batchLinks.split('\n').filter(link => link.trim());
+    if (links.length === 0) {
+      toast.error("请输入有效的订阅链接");
+      return;
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+    const newParsedProxies: ParsedProxy[] = [];
+
+    links.forEach((link, index) => {
+      try {
+        const proxy = ProxyParser.parseProxy(link.trim());
+        if (proxy) {
+          const parsedProxy: ParsedProxy = {
+            ...proxy,
+            id: generateId()
+          };
+          newParsedProxies.push(parsedProxy);
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (error) {
+        console.error(`解析第 ${index + 1} 个链接失败:`, error);
+        failCount++;
+      }
+    });
+
+    if (newParsedProxies.length > 0) {
+      const newProxies = [...parsedProxies, ...newParsedProxies];
+      setParsedProxies(newProxies);
+      setBatchLinks("");
+      
+      toast.success(`批量解析完成：成功 ${successCount} 个，失败 ${failCount} 个`);
+    } else {
+      toast.error("所有链接解析失败，请检查链接格式");
     }
   };
 
@@ -258,46 +309,98 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-13 gap-6">
           
           {/* 左侧：添加节点 */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="lg:col-span-4 space-y-6">
             
             {/* 添加节点卡片 */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  添加节点
-                </CardTitle>
-                <CardDescription>
-                  输入单个订阅链接，解析后添加到节点列表
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plus className="h-5 w-5" />
+                      添加节点
+                    </CardTitle>
+                    <CardDescription>
+                      {inputMode === "single" ? "输入单个订阅链接，解析后添加到节点列表" : "批量输入多个订阅链接，一次性解析并添加"}
+                    </CardDescription>
+                  </div>
+                  <Select value={inputMode} onValueChange={(value: "single" | "batch") => setInputMode(value)}>
+                    <SelectTrigger className="w-auto border-none shadow-none bg-transparent p-1 h-8 w-8 flex items-center justify-center [&>span]:!hidden">
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          单个链接
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="batch">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          批量导入
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="single-link">订阅链接</Label>
-                  <Input
-                    id="single-link"
-                    value={singleLink}
-                    onChange={(e) => setSingleLink(e.target.value)}
-                    placeholder="粘贴单个订阅链接..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleParseSingleLink();
-                      }
-                    }}
-                  />
-                </div>
-                
-                <Button 
-                  onClick={handleParseSingleLink}
-                  disabled={!singleLink.trim()}
-                  className="w-full"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  解析并添加
-                </Button>
+                {inputMode === "single" ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="single-link">订阅链接</Label>
+                      <Input
+                        id="single-link"
+                        value={singleLink}
+                        onChange={(e) => setSingleLink(e.target.value)}
+                        placeholder="粘贴单个订阅链接..."
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleParseSingleLink();
+                          }
+                        }}
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleParseSingleLink}
+                      disabled={!singleLink.trim()}
+                      className="w-full"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      解析并添加
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="batch-links">批量订阅链接</Label>
+                      <Textarea
+                        id="batch-links"
+                        value={batchLinks}
+                        onChange={(e) => setBatchLinks(e.target.value)}
+                        placeholder="粘贴多个订阅链接，每行一个..."
+                        className="min-h-32 resize-none"
+                        rows={6}
+                      />
+                      <div className="text-xs text-muted-foreground">
+                        每行输入一个订阅链接，支持各种协议格式
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={handleParseBatchLinks}
+                      disabled={!batchLinks.trim()}
+                      className="w-full"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      批量解析并添加
+                    </Button>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -388,7 +491,7 @@ export default function Home() {
           </div>
 
           {/* 中间：节点列表 */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-start-5 lg:col-span-5 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -566,7 +669,7 @@ export default function Home() {
           </div>
 
           {/* 右侧：输出配置 */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-start-10 lg:col-span-4 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

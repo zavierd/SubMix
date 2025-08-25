@@ -145,6 +145,80 @@ SubMix 自动生成完整的 Mihomo 配置，包含：
 - **YAML 处理**: js-yaml
 - **协议解析**: 自定义解析器
 
+## 部署指南
+
+### 一键部署
+
+[![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/YoungLee-coder/SubMix)
+
+[![Deploy to Cloudflare Pages](https://img.shields.io/badge/Deploy%20to-Cloudflare%20Pages-orange?style=for-the-badge&logo=cloudflare)](https://dash.cloudflare.com/?to=/:account/pages/new)
+
+> **注意**: 点击 Vercel 按钮会自动导入本项目模板到您的 Vercel 账户进行部署。
+> 
+> **Cloudflare Pages**: 点击按钮进入 Cloudflare Pages 控制台，然后选择"连接到 Git"来部署此项目。
+
+### 手动部署到 Vercel
+
+1. **Fork 此仓库**：点击页面右上角的 "Fork" 按钮，将项目复制到您的 GitHub 账户
+
+2. **注册或登录 Vercel**：前往 [Vercel 官网](https://vercel.com/) 注册或登录您的账户
+
+3. **导入项目**：
+   - 在 Vercel 仪表板中，点击 "New Project" 按钮
+   - 从您的 GitHub 仓库列表中选择刚刚 Fork 的项目
+   - 或者直接使用一键部署按钮自动导入
+
+4. **配置项目设置**：
+   - **框架预设**：Next.js（自动检测）
+   - **构建命令**：`npm run build`
+   - **输出目录**：`.next`（默认）
+   - **安装命令**：`npm install`
+
+5. **部署项目**：点击 "Deploy" 按钮，Vercel 将自动构建并部署您的项目
+
+### 手动部署到 Cloudflare Pages
+
+1. **Fork 此仓库**：点击页面右上角的 "Fork" 按钮，将项目复制到您的 GitHub 账户
+
+2. **注册或登录 Cloudflare**：前往 [Cloudflare 官网](https://www.cloudflare.com/) 注册或登录您的账户
+
+3. **创建新的 Pages 项目**：
+   - 点击上方的 Cloudflare Pages 部署按钮，或手动前往 [Cloudflare Pages 控制台](https://dash.cloudflare.com/?to=/:account/pages/new)
+   - 点击 "Create application"，然后选择 "Pages"
+   - 选择 "Connect to Git"，并授权 Cloudflare 访问您的 GitHub 账户
+   - 选择您刚刚 Fork 的仓库
+
+4. **配置构建设置**：
+   - **生产分支**：`main` 或 `master`
+   - **构建命令**：`npm run build`
+   - **构建输出目录**：`.next`
+   - **根目录**：`/`（默认）
+
+5. **部署项目**：点击 "Save and Deploy" 按钮，Cloudflare Pages 将开始构建并部署您的项目
+
+### 自定义域名
+
+部署完成后，您可以：
+
+- **Vercel**：在项目设置中绑定自定义域名
+- **Cloudflare Pages**：在 Pages 项目设置中配置自定义域名
+
+### 快速开始部署
+
+1. **Fork 此项目**到您的 GitHub 账户
+2. **点击上方的一键部署按钮**选择您偏好的平台
+3. **等待自动构建完成**（通常需要1-3分钟）
+4. **获得您的专属部署链接**
+
+### 部署注意事项
+
+- ✅ 项目开箱即用，无需额外配置
+- ✅ 支持 Node.js 18+ 环境
+- ✅ 自动启用 HTTPS 和全球 CDN 加速
+- ✅ 支持自定义域名绑定
+- ⚠️ 如果使用 pnpm，建议在构建设置中指定包管理器
+- 💡 首次部署可能需要 2-5 分钟，后续更新会更快
+
 ## 文件结构
 
 ```

@@ -198,11 +198,20 @@ export default function Home() {
     toast.info("已清空所有节点");
   };
 
+  // 获取协议显示类型（根据加密方法判断SS/SS2022）
+  const getDisplayProtocolType = (proxy: ParsedProxy): string => {
+    if (proxy.type === 'ss' && proxy.cipher && ProxyParser.isSSR2022Cipher(proxy.cipher)) {
+      return 'ss2022';
+    }
+    return proxy.type;
+  };
+
   const getProtocolIcon = (type: string) => {
     switch (type) {
       case "vless": return <Shield className="h-4 w-4" />;
       case "hysteria2": return <Network className="h-4 w-4" />;
-      case "ss": return <Server className="h-4 w-4" />;
+      case "ss":
+      case "ss2022": return <Server className="h-4 w-4" />;
       case "trojan": return <Shield className="h-4 w-4" />;
       default: return <Server className="h-4 w-4" />;
     }
@@ -213,6 +222,7 @@ export default function Home() {
       case "vless": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "hysteria2": return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
       case "ss": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "ss2022": return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
       case "trojan": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }
@@ -413,16 +423,17 @@ export default function Home() {
                               <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
                                   <div className={`p-1.5 rounded-md ${
-                                    proxy.type === "vless" ? "bg-blue-100 dark:bg-blue-900/20" :
-                                    proxy.type === "hysteria2" ? "bg-purple-100 dark:bg-purple-900/20" :
-                                    proxy.type === "ss" ? "bg-green-100 dark:bg-green-900/20" :
-                                    proxy.type === "trojan" ? "bg-red-100 dark:bg-red-900/20" :
+                                    getDisplayProtocolType(proxy) === "vless" ? "bg-blue-100 dark:bg-blue-900/20" :
+                                    getDisplayProtocolType(proxy) === "hysteria2" ? "bg-purple-100 dark:bg-purple-900/20" :
+                                    getDisplayProtocolType(proxy) === "ss" ? "bg-green-100 dark:bg-green-900/20" :
+                                    getDisplayProtocolType(proxy) === "ss2022" ? "bg-emerald-100 dark:bg-emerald-900/20" :
+                                    getDisplayProtocolType(proxy) === "trojan" ? "bg-red-100 dark:bg-red-900/20" :
                                     "bg-gray-100 dark:bg-gray-900/20"
                                   }`}>
-                                    {getProtocolIcon(proxy.type)}
+                                    {getProtocolIcon(getDisplayProtocolType(proxy))}
                                   </div>
                                   <Badge variant="secondary" className="text-xs font-medium">
-                                    {proxy.type.toUpperCase()}
+                                    {getDisplayProtocolType(proxy).toUpperCase()}
                                   </Badge>
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -776,9 +787,9 @@ export default function Home() {
                   
                   <div className="p-3 bg-muted rounded-lg">
                     <div className="text-sm font-medium mb-1">协议类型</div>
-                    <Badge className={getProtocolColor(editingProxy.type)}>
-                      {getProtocolIcon(editingProxy.type)}
-                      <span className="ml-1">{editingProxy.type.toUpperCase()}</span>
+                    <Badge className={getProtocolColor(getDisplayProtocolType(editingProxy))}>
+                      {getProtocolIcon(getDisplayProtocolType(editingProxy))}
+                      <span className="ml-1">{getDisplayProtocolType(editingProxy).toUpperCase()}</span>
                     </Badge>
                   </div>
                 </div>

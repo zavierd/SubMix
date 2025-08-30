@@ -521,8 +521,8 @@ export class ShadowsocksParser extends BaseProtocolParser {
       }
 
       // 处理 client-fingerprint 字段（shadow-tls 和 restls 插件需要）
-      if (params['client-fingerprint'] || params.fingerprint) {
-        const fingerprint = params['client-fingerprint'] || params.fingerprint;
+      if (params['client-fingerprint']) {
+        const fingerprint = params['client-fingerprint'];
         const validFingerprints = ['chrome', 'firefox', 'safari', 'ios', 'android', 'edge', 'random'];
         if (validFingerprints.includes(fingerprint.toLowerCase())) {
           config['client-fingerprint'] = fingerprint.toLowerCase();

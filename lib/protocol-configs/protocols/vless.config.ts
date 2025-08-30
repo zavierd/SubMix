@@ -6,7 +6,6 @@ import type { ProtocolEditConfig } from '@/types/proxy';
 import { 
   basicFields, 
   createPortField, 
-  tlsFields, 
   clientFingerprintField,
   realityFields,
   websocketFields,
@@ -88,7 +87,22 @@ export const vlessConfig: ProtocolEditConfig = {
       placeholder: 'example.com',
       description: 'TLS Server Name Indication'
     },
-    ...tlsFields,
+    {
+      key: 'skip-cert-verify',
+      label: '跳过证书验证',
+      type: 'boolean',
+      group: 'tls',
+      defaultValue: false,
+      description: '跳过 TLS 证书验证（不安全）'
+    },
+    {
+      key: 'alpn',
+      label: 'ALPN 协议',
+      type: 'text',
+      group: 'tls',
+      placeholder: 'h2,http/1.1',
+      description: 'Application Layer Protocol Negotiation，逗号分隔'
+    },
     clientFingerprintField,
     
     // REALITY 配置

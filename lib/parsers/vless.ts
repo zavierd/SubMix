@@ -162,18 +162,16 @@ export class VlessParser extends BaseProtocolParser {
         }
       }
       
-      // 服务器指纹
-      if (params.fingerprint || params.fp) {
-        config.fingerprint = params.fingerprint || params.fp;
-      }
-      
-      // 客户端指纹
-      if (params['client-fingerprint'] || params.clientFingerprint) {
-        const clientFp = params['client-fingerprint'] || params.clientFingerprint;
+      // 客户端指纹 (VLESS协议使用client-fingerprint字段)
+      if (params['client-fingerprint'] || params.clientFingerprint || params.fingerprint || params.fp) {
+        // 优先使用client-fingerprint，其次是fingerprint（兼容性处理）
+        const clientFp = params['client-fingerprint'] || params.clientFingerprint || params.fingerprint || params.fp;
         if (VlessParser.getSupportedClientFingerprints().includes(clientFp)) {
           config['client-fingerprint'] = clientFp;
         } else {
-          console.warn(`不支持的客户端指纹: ${clientFp}`);
+          console.warn(`不支持的客户端指纹: ${clientFp}，支持的指纹: ${VlessParser.getSupportedClientFingerprints().join(', ')}`);
+          // 设置默认值
+          config['client-fingerprint'] = 'chrome';
         }
       }
       

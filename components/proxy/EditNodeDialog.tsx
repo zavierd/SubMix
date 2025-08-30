@@ -28,11 +28,13 @@ export function EditNodeDialog({
 }: EditNodeDialogProps) {
   const { configs, loading, error } = useEditConfig();
   const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [originalFields, setOriginalFields] = useState<Set<string>>(new Set());
 
   // 当代理或配置改变时，初始化表单数据
   useEffect(() => {
     if (proxy && configs.length > 0) {
       const initialData: Record<string, unknown> = {};
+      const existingFields = new Set<string>();
       
       // 从代理对象中提取现有值
       const copyProxyValue = (obj: Record<string, unknown>, path: string): unknown => {
@@ -55,10 +57,18 @@ export function EditNodeDialog({
       if (config) {
         config.fields.forEach(field => {
           const value = copyProxyValue(proxy as Record<string, unknown>, field.key);
-          initialData[field.key] = value !== undefined ? value : (field.defaultValue || '');
+          if (value !== undefined) {
+            // 只有当原始节点中存在该字段时，才记录并初始化
+            existingFields.add(field.key);
+            initialData[field.key] = value;
+          } else {
+            // 对于不存在的字段，使用默认值但不记录为原始字段
+            initialData[field.key] = field.defaultValue || '';
+          }
         });
       }
       
+      setOriginalFields(existingFields);
       setFormData(initialData);
     }
   }, [proxy, configs]);
@@ -97,6 +107,25 @@ export function EditNodeDialog({
   const handleSave = () => {
     if (!proxy) return;
 
+    // 检查字段是否被用户修改过
+    const isFieldModified = (fieldKey: string, value: unknown): boolean => {
+      const copyProxyValue = (obj: Record<string, unknown>, path: string): unknown => {
+        const keys = path.split('.');
+        let current: unknown = obj;
+        for (const key of keys) {
+          if (current && typeof current === 'object' && key in current) {
+            current = (current as Record<string, unknown>)[key];
+          } else {
+            return undefined;
+          }
+        }
+        return current;
+      };
+
+      const originalValue = copyProxyValue(proxy as Record<string, unknown>, fieldKey);
+      return originalValue !== value;
+    };
+
     // 深度设置嵌套属性
     const setNestedValue = (obj: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> => {
       const keys = path.split('.');
@@ -123,11 +152,46 @@ export function EditNodeDialog({
       return result;
     };
 
+    // 深度删除嵌套属性
+    const deleteNestedValue = (obj: Record<string, unknown>, path: string): Record<string, unknown> => {
+      const keys = path.split('.');
+      const result = { ...obj };
+      let current: Record<string, unknown> = result;
+      
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (!(key in current) || typeof current[key] !== 'object') {
+          return result; // 路径不存在，无需删除
+        }
+        current[key] = { ...(current[key] as Record<string, unknown>) };
+        current = current[key] as Record<string, unknown>;
+      }
+      
+      const lastKey = keys[keys.length - 1];
+      delete current[lastKey];
+      
+      return result;
+    };
+
     let updatedProxy = { ...proxy } as Record<string, unknown>;
     
-    // 应用所有表单数据
+    // 只处理原始存在的字段或用户修改过的字段
     Object.entries(formData).forEach(([key, value]) => {
-      updatedProxy = setNestedValue(updatedProxy, key, value);
+      const wasOriginalField = originalFields.has(key);
+      const isModified = isFieldModified(key, value);
+      
+      if (wasOriginalField || isModified) {
+        // 如果是空值且不是原始字段，则删除
+        if ((value === '' || value === undefined || value === null) && !wasOriginalField) {
+          updatedProxy = deleteNestedValue(updatedProxy, key);
+        } else if (value !== '' && value !== undefined && value !== null) {
+          // 非空值才设置
+          updatedProxy = setNestedValue(updatedProxy, key, value);
+        } else if (wasOriginalField && (value === '' || value === undefined || value === null)) {
+          // 原始字段被清空，则删除
+          updatedProxy = deleteNestedValue(updatedProxy, key);
+        }
+      }
     });
 
     onSave(updatedProxy as ParsedProxy);

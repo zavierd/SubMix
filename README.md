@@ -1,6 +1,6 @@
 # SubMix
 
-🚀 一个强大的代理订阅链接转换器，将单独的代理订阅链接转换为 Mihomo 内核 YAML 配置文件
+ 一个强大的代理订阅链接转换器，将单独的代理订阅链接转换为 Mihomo 内核 YAML 配置文件
 
 [![Deploy to Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/YoungLee-coder/SubMix)
 [![Deploy to Cloudflare Pages](https://img.shields.io/badge/Deploy%20to-Cloudflare%20Pages-orange?style=for-the-badge&logo=cloudflare)](https://dash.cloudflare.com/?to=/:account/pages/new)
@@ -162,156 +162,9 @@ SubMix/
 └── 📁 public/                       # 静态资源
 ```
 
-### 🔄 模块化架构优势
-
-**1. 协议配置模块化**
-- 每个协议独立配置文件
-- 公共字段复用，减少重复代码
-- 类型安全的字段定义
-- 自动配置验证
-
-**2. 解析器模块化**  
-- 统一的解析器接口
-- 独立的协议解析逻辑
-- 易于测试和维护
-
-**3. 组件模块化**
-- 功能独立的 React 组件
-- 自定义 Hooks 封装业务逻辑
-- 清晰的数据流
-
-## 👨‍💻 开发指南
-
-### 🆕 添加新协议支持
-
-添加新协议变得非常简单，只需要3个步骤：
-
-#### 1. 创建协议配置文件
-```typescript
-// lib/protocol-configs/protocols/newprotocol.config.ts
-import type { ProtocolEditConfig } from '@/types/proxy';
-import { basicFields, createPortField, /* ... */ } from '../base/common-fields';
-
-export const newProtocolConfig: ProtocolEditConfig = {
-  type: 'newprotocol',
-  name: 'New Protocol',
-  icon: 'Shield',
-  color: 'bg-purple-100 text-purple-800',
-  fields: [
-    ...basicFields,                    // 复用基础字段
-    createPortField(8080),             // 使用字段生成器
-    {
-      key: 'custom-field',
-      label: '自定义字段',
-      type: 'text',
-      group: 'protocol',
-      description: '协议特有的配置字段'
-    }
-    // ... 更多字段
-  ]
-};
-```
-
-#### 2. 创建协议解析器
-```typescript
-// lib/parsers/newprotocol.ts
-import { BaseProtocolParser } from './base';
-
-export class NewProtocolParser extends BaseProtocolParser {
-  supports(url: string): boolean {
-    return url.startsWith('newprotocol://');
-  }
-
-  parse(url: string): ProxyNode | null {
-    // 实现解析逻辑
-    return {
-      type: 'newprotocol',
-      name: 'parsed-name',
-      server: 'server.com',
-      port: 8080,
-      // ... 其他字段
-    };
-  }
-}
-```
-
-#### 3. 注册新协议
-```typescript
-// lib/protocol-configs/generator.ts
-import { newProtocolConfig } from './protocols/newprotocol.config';
-
-export function getAllProtocolConfigs(): ProtocolEditConfig[] {
-  return [
-    // ... 现有协议
-    newProtocolConfig,  // 添加新协议
-  ];
-}
-
-// lib/proxy-parser.ts  
-import { NewProtocolParser } from './parsers/newprotocol';
-
-private static readonly parsers: IProtocolParser[] = [
-  // ... 现有解析器
-  new NewProtocolParser(),  // 添加新解析器
-];
-```
-
-### 🔧 修改现有协议
-
-只需修改对应的配置文件，不会影响其他协议：
-
-```typescript
-// lib/protocol-configs/protocols/vless.config.ts
-// 直接修改 VLESS 配置，其他协议不受影响
-```
-
-### 🧪 配置验证
-
-项目内置配置验证功能：
-
-```typescript
-import { validateProtocolConfigs } from '@/lib/protocol-configs';
-
-const validation = validateProtocolConfigs();
-if (!validation.valid) {
-  console.error('配置错误:', validation.errors);
-}
-```
-
-### 📊 配置统计
-
-获取协议配置统计信息：
-
-```typescript
-import { getProtocolStats } from '@/lib/protocol-configs';
-
-const stats = getProtocolStats();
-console.log(`总协议数: ${stats.total}`);
-console.log('协议详情:', stats.byType);
-```
-
-## 🔍 代码质量
-
-- **TypeScript 严格模式**：确保类型安全
-- **ESLint 配置**：统一代码风格
-- **模块化设计**：高内聚、低耦合
-- **自动验证**：开发时自动检查配置完整性
-
-## 📄 许可证
-
-MIT License
-
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
-
-### 贡献指南
-
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
 
 ## ⚠️ 免责声明
 

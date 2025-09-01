@@ -72,7 +72,9 @@ export class VlessParser extends BaseProtocolParser {
 
       // 验证 UUID 格式
       if (!uuid || !this.isValidUUID(uuid)) {
-        console.warn('VLESS UUID 格式无效:', uuid);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('VLESS UUID 格式无效:', uuid);
+        }
       }
 
       const config: ProxyNode & VlessConfig = {

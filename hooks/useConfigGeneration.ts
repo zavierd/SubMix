@@ -104,7 +104,10 @@ export function useConfigGeneration(proxies: ParsedProxy[], ruleMode: RuleMode) 
       const baseUrl = window.location.origin;
       const subscriptionUrl = `${baseUrl}/api/subscription?id=${id}`;
       
-      console.log('生成的订阅链接:', subscriptionUrl);
+      // 开发环境下记录订阅链接
+      if (process.env.NODE_ENV === 'development') {
+        console.log('生成的订阅链接:', subscriptionUrl);
+      }
       
       // 将订阅链接编码到二维码中
       const qrDataURL = await QRCode.toDataURL(subscriptionUrl, {

@@ -7,7 +7,6 @@ import { NextResponse } from 'next/server';
 import type { EditConfigResponse } from '@/types/proxy';
 import { 
   getAllProtocolConfigs, 
-  fieldGroups, 
   validateProtocolConfigs 
 } from '@/lib/protocol-configs';
 
@@ -46,5 +45,4 @@ export async function GET() {
   }
 }
 
-// 导出字段分组配置供前端使用
-export const FIELD_GROUPS = fieldGroups;
+// 注意：FIELD_GROUPS 暂时未使用，如需要可通过 /lib/protocol-configs 直接导入

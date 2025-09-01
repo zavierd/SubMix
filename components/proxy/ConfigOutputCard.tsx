@@ -6,18 +6,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Download, Copy, Settings } from "lucide-react";
+import { Download, Copy, Settings, QrCode } from "lucide-react";
 
 interface ConfigOutputCardProps {
   outputYaml: string;
   onDownload: () => void;
   onCopy: () => void;
+  onGenerateQR: () => void;
 }
 
 export function ConfigOutputCard({
   outputYaml,
   onDownload,
-  onCopy
+  onCopy,
+  onGenerateQR
 }: ConfigOutputCardProps) {
   return (
     <Card className="h-[560px] flex flex-col">
@@ -51,15 +53,26 @@ export function ConfigOutputCard({
             <Download className="mr-2 h-4 w-4" />
             下载配置文件
           </Button>
-          <Button 
-            variant="outline"
-            onClick={onCopy}
-            disabled={!outputYaml}
-            className="w-full"
-          >
-            <Copy className="mr-2 h-4 w-4" />
-            复制到剪贴板
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={onGenerateQR}
+              disabled={!outputYaml}
+              className="flex-1"
+            >
+              <QrCode className="mr-2 h-4 w-4" />
+              二维码
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={onCopy}
+              disabled={!outputYaml}
+              className="flex-1"
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              复制
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

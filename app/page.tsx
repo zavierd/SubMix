@@ -43,6 +43,7 @@ export default function Home() {
     handleGenerateConfig,
     downloadConfig,
     copyConfig,
+    generateQR,
   } = useConfigGeneration(parsedProxies, ruleMode);
 
   // 编辑节点处理
@@ -129,6 +130,7 @@ export default function Home() {
               outputYaml={outputYaml}
               onDownload={downloadConfig}
               onCopy={copyConfig}
+              onGenerateQR={generateQR}
             />
           </div>
         </div>

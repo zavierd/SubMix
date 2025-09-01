@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -28,6 +29,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Script
+          src="https://cloud.umami.is/script.js"
+          data-website-id="ca9e233c-e4b1-4af5-99d6-69066a8290e5"
+          strategy="afterInteractive"
+        />
         {children}
         <Toaster />
       </body>

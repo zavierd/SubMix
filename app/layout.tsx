@@ -31,8 +31,8 @@ export default function RootLayout({
       >
         <Script
           src="https://cloud.umami.is/script.js"
-          data-website-id="ca9e233c-e4b1-4af5-99d6-69066a8290e5"
-          strategy="afterInteractive"
+          data-website-id="9d983291-3037-4389-8845-de20d10a30a2"
+          defer
         />
         {children}
         <Toaster />

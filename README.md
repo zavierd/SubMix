@@ -35,6 +35,11 @@ pnpm start
 
 点击上方的部署按钮，即可快速部署到 Vercel 或 Cloudflare Pages。
 
+#### Cloudflare Pages 部署状态
+- ✅ **已优化**: 支持 Edge Runtime，所有 API 路由已适配
+- 🚀 **自动构建**: 使用 `@cloudflare/next-on-pages` 构建工具
+- ⚡ **全球加速**: CDN 加速，访问速度更快
+
 ## 📖 使用方法
 
 1. **添加节点**：在左侧输入框粘贴订阅链接，选择单个或批量模式

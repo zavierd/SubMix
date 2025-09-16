@@ -2,6 +2,9 @@
 
 import { NextResponse } from 'next/server';
 
+// 配置 Edge Runtime
+export const runtime = 'edge';
+
 // 由于无法直接访问父级的 configCache，这里创建一个统计接口
 // 在生产环境中应该移除或加强安全验证
 

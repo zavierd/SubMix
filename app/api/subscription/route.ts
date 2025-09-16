@@ -3,6 +3,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+// 配置 Edge Runtime
+export const runtime = 'edge';
+
 // 存储配置的临时缓存 (生产环境建议使用Redis等持久化存储)
 const configCache = new Map<string, { config: string; timestamp: number }>();
 
@@ -40,27 +43,8 @@ function getRemainingTime(timestamp: number): number {
   return Math.max(0, Math.ceil(remaining / (60 * 1000)));
 }
 
-// 定时清理器 - 每5分钟自动清理一次过期数据
-let cleanupInterval: NodeJS.Timeout | null = null;
-
-function startPeriodicCleanup() {
-  // 避免重复启动定时器
-  if (cleanupInterval) return;
-  
-  cleanupInterval = setInterval(() => {
-    const cleaned = cleanExpiredConfigs();
-    if (process.env.NODE_ENV === 'development' && cleaned > 0) {
-      console.log(`⏰ 定时清理完成，清理了 ${cleaned} 个过期配置`);
-    }
-  }, 5 * 60 * 1000); // 每5分钟执行一次
-  
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔄 启动定时清理器，每5分钟清理一次过期配置');
-  }
-}
-
-// 启动定时清理（在模块加载时执行）
-startPeriodicCleanup();
+// Edge Runtime 不支持 setInterval，改为在每次请求时进行清理
+// 定时清理器已移除，改为请求时清理过期数据
 
 // 生成唯一ID
 function generateId(): string {

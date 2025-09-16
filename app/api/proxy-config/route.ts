@@ -4,6 +4,9 @@
  */
 
 import { NextResponse } from 'next/server';
+
+// 配置 Edge Runtime
+export const runtime = 'edge';
 import type { EditConfigResponse } from '@/types/proxy';
 import { 
   getAllProtocolConfigs, 

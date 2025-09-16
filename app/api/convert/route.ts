@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ProxyParser } from '@/lib/proxy-parser';
 import { MihomoConfigGenerator } from '@/lib/mihomo-config';
 
+// 配置 Edge Runtime
+export const runtime = 'edge';
+
 export interface ConvertRequest {
   links: string[];
   configType: 'simple' | 'full';
